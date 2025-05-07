@@ -79,7 +79,7 @@ class medical_report_system:
                 "5. Identification of 3-5 knowledge gaps"
             ),
             agent=self.researcher(),
-            output_file="research_brief.md"
+            output_file="research_brief.docx"
         )
 
     @task
@@ -201,7 +201,7 @@ class medical_report_system:
                 "3. Notes for updating and maintaining the template"
             ),
             agent=self.integration_specialist(),
-            output_file="tracking_template.xlsx"
+            output_file="tracking_template.csv"
         )
 
     @crew

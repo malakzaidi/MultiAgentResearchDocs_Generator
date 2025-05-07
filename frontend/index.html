@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MultiAgentDocs</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(120deg, #1a365d 0%, #2d3748 100%);
+        }
+        .agent-card {
+            transition: all 0.3s ease;
+        }
+        .agent-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        .progress-ring__circle {
+            stroke-dasharray: 283;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+        .output-preview {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #f9fafb;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+        .animated-gradient {
+            background: linear-gradient(270deg, #3182ce, #63b3ed, #4299e1);
+            background-size: 600% 600%;
+            animation: gradientAnimation 4s ease infinite;
+        }
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .task-item {
+            transition: background-color 0.3s ease;
+        }
+        .task-item:hover {
+            background-color: #f1f5f9;
+        }
+        .preview-modal {
+            max-height: 80vh;
+            overflow-y: auto;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.7);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <nav class="gradient-bg text-white p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-brain text-blue-300 text-2xl"></i>
+                <h1 class="text-2xl font-bold">MultiAgentDocs</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="new-project-btn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center">
+                    <i class="fas fa-plus mr-2"></i> New Project
+                </button>
+                <div class="relative">
+                    <button id="user-menu" class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-full bg-blue-400 flex items-center justify-center">
+                            <span class="font-semibold">U</span>
+                        </div>
+                        <span>User</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto py-6 px-4">
+        <!-- Project Configuration Panel -->
+        <div id="project-config" class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-bold mb-4">Project Configuration</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="topic" class="block text-sm font-medium text-gray-700 mb-1">Research Topic</label>
+                    <input type="text" id="topic" placeholder="e.g., Quantum Computing, Climate Change" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border">
+                </div>
+                <div>
+                    <label for="current-year" class="block text-sm font-medium text-gray-700 mb-1">Reference Year</label>
+                    <input type="number" id="current-year" value="2025" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Tasks</label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="flex items-center">
+                            <input id="task-research" type="checkbox" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="task-research" class="ml-2 text-sm text-gray-700">Research</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="task-data" type="checkbox" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="task-data" class="ml-2 text-sm text-gray-700">Data Analysis</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="task-report" type="checkbox" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="task-report" class="ml-2 text-sm text-gray-700">Report</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="task-ethics" type="checkbox" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="task-ethics" class="ml-2 text-sm text-gray-700">Ethics Assessment</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="task-master" type="checkbox" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="task-master" class="ml-2 text-sm text-gray-700">Master Report</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="task-presentation" type="checkbox" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="task-presentation" class="ml-2 text-sm text-gray-700">Presentation</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="task-dashboard" type="checkbox" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="task-dashboard" class="ml-2 text-sm text-gray-700">Dashboard Spec</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="task-template" type="checkbox" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="task-template" class="ml-2 text-sm text-gray-700">Tracking Template</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button id="run-project" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center font-medium">
+                    <i class="fas fa-play mr-2"></i> Run Project
+                </button>
+            </div>
+        </div>
+
+        <!-- Agents Section -->
+        <h2 class="text-xl font-bold mb-4">AI Agent Team</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+            <div class="agent-card bg-white rounded-lg shadow-md p-4 border-t-4 border-blue-500">
+                <div class="flex items-start justify-between">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                        <i class="fas fa-microscope text-blue-500"></i>
+                    </div>
+                    <div class="ml-2 flex-1">
+                        <h3 class="font-bold">Researcher</h3>
+                        <p class="text-sm text-gray-600">Research Intelligence</p>
+                    </div>
+                    <div class="relative w-8 h-8">
+                        <svg class="progress-ring w-8 h-8">
+                            <circle class="progress-ring__circle" stroke="#E2E8F0" stroke-width="2" fill="transparent" r="15" cx="16" cy="16"/>
+                            <circle class="progress-ring__circle" id="researcher-progress" stroke="#3182CE" stroke-width="2" fill="transparent" r="15" cx="16" cy="16" stroke-dashoffset="283"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <div class="text-xs text-gray-500 flex justify-between">
+                        <span>Status:</span>
+                        <span id="researcher-status" class="text-gray-500 font-medium">Waiting</span>
+                    </div>
+                </div>
+            </div>
+            <div class="agent-card bg-white rounded-lg shadow-md p-4 border-t-4 border-indigo-500">
+                <div class="flex items-start justify-between">
+                    <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center">
+                        <i class="fas fa-chart-line text-indigo-500"></i>
+                    </div>
+                    <div class="ml-2 flex-1">
+                        <h3 class="font-bold">Data Analyst</h3>
+                        <p class="text-sm text-gray-600">Quantitative Intelligence</p>
+                    </div>
+                    <div class="relative w-8 h-8">
+                        <svg class="progress-ring w-8 h-8">
+                            <circle class="progress-ring__circle" stroke="#E2E8F0" stroke-width="2" fill="transparent" r="15" cx="16" cy="16"/>
+                            <circle class="progress-ring__circle" id="analyst-progress" stroke="#667EEA" stroke-width="2" fill="transparent" r="15" cx="16" cy="16" stroke-dashoffset="283"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <div class="text-xs text-gray-500 flex justify-between">
+                        <span>Status inteiro:</span>
+                        <span id="analyst-status" class="text-gray-500 font-medium">Waiting</span>
+                    </div>
+                </div>
+            </div>
+            <div class="agent-card bg-white rounded-lg shadow-md p-4 border-t-4 border-purple-500">
+                <div class="flex items-start justify-between">
+                    <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                        <i class="fas fa-file-alt text-purple-500"></i>
+                    </div>
+                    <div class="ml-2 flex-1">
+                        <h3 class="font-bold">Reporting Analyst</h3>
+                        <p class="text-sm text-gray-600">Communication Specialist</p>
+                    </div>
+                    <div class="relative w-8 h-8">
+                        <svg class="progress-ring w-8 h-8">
+                            <circle class="progress-ring__circle" stroke="#E2E8F0" stroke-width="2" fill="transparent" r="15" cx="16" cy="16"/>
+                            <circle class="progress-ring__circle" id="reporting-progress" stroke="#9F7AEA" stroke-width="2" fill="transparent" r="15" cx="16" cy="16" stroke-dashoffset="283"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <div class="text-xs text-gray-500 flex justify-between">
+                        <span>Status:</span>
+                        <span id="reporting-status" class="text-gray-500 font-medium">Waiting</span>
+                    </div>
+                </div>
+            </div>
+            <div class="agent-card bg-white rounded-lg shadow-md p-4 border-t-4 border-red-500">
+                <div class="flex items-start justify-between">
+                    <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                        <i class="fas fa-balance-scale text-red-500"></i>
+                    </div>
+                    <div class="ml-2 flex-1">
+                        <h3 class="font-bold">Ethics Guardian</h3>
+                        <p class="text-sm text-gray-600">Ethics Evaluator</p>
+                    </div>
+                    <div class="relative w-8 h-8">
+                        <svg class="progress-ring w-8 h-8">
+                            <circle class="progress-ring__circle" stroke="#E2E8F0" stroke-width="2" fill="transparent" r="15" cx="16" cy="16"/>
+                            <circle class="progress-ring__circle" id="ethics-progress" stroke="#F56565" stroke-width="2" fill="transparent" r="15" cx="16" cy="16" stroke-dashoffset="283"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <div class="text-xs text-gray-500 flex justify-between">
+                        <span>Status:</span>
+                        <span id="ethics-status" class="text-gray-500 font-medium">Waiting</span>
+                    </div>
+                </div>
+            </div>
+            <div class="agent-card bg-white rounded-lg shadow-md p-4 border-t-4 border-green-500">
+                <div class="flex items-start justify-between">
+                    <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                        <i class="fas fa-project-diagram text-green-500"></i>
+                    </div>
+                    <div class="ml-2 flex-1">
+                        <h3 class="font-bold">Integration Specialist</h3>
+                        <p class="text-sm text-gray-600">Knowledge Architect</p>
+                    </div>
+                    <div class="relative w-8 h-8">
+                        <svg class="progress-ring w-8 h-8">
+                            <circle class="progress-ring__circle" stroke="#E2E8F0" stroke-width="2" fill="transparent" r="15" cx="16" cy="16"/>
+                            <circle class="progress-ring__circle" id="integration-progress" stroke="#48BB78" stroke-width="2" fill="transparent" r="15" cx="16" cy="16" stroke-dashoffset="283"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <div class="text-xs text-gray-500 flex justify-between">
+                        <span>Status:</span>
+                        <span id="integration-status" class="text-gray-500 font-medium">Waiting</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tasks Progress Section -->
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold">Tasks Progress</h2>
+            <div class="text-sm font-medium">
+                <span id="task-progress" class="text-blue-600">0/8</span> tasks completed
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="space-y-4" id="task-list">
+                <div class="task-item" id="task-research-item">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3">
+                                <i class="fas fa-clock text-gray-400"></i>
+                            </span>
+                            <h3 class="font-bold text-gray-500">Research Task</h3>
+                        </div>
+                        <div class="text-sm font-medium text-gray-400">Pending</div>
+                    </div>
+                    <div class="pl-11">
+                        <p class="text-sm text-gray-500 mb-2">Comprehensive research on the selected topic</p>
+                        <div class="flex items-center text-xs text-gray-500">
+                            <span class="mr-4"><i class="far fa-clock mr-1"></i> <span id="research-time">0 min</span></span>
+                            <span><i class="far fa-file-alt mr-1"></i> research_brief.md</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="task-item" id="task-data-item">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3">
+                                <i class="fas fa-clock text-gray-400"></i>
+                            </span>
+                            <h3 class="font-bold text-gray-500">Data Analysis Task</h3>
+                        </div>
+                        <div class="text-sm font-medium text-gray-400">Pending</div>
+                    </div>
+                    <div class="pl-11">
+                        <p class="text-sm text-gray-500 mb-2">Quantitative analysis of research findings</p>
+                        <div class="flex items-center text-xs text-gray-500">
+                            <span class="mr-4"><i class="far fa-clock mr-1"></i> <span id="data-time">0 min</span></span>
+                            <span><i class="far fa-file-alt mr-1"></i> data_analysis.md</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="task-item" id="task-report-item">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3">
+                                <i class="fas fa-clock text-gray-400"></i>
+                            </span>
+                            <h3 class="font-bold text-gray-500">Reporting Task</h3>
+                        </div>
+                        <div class="text-sm font-medium text-gray-400">Pending</div>
+                    </div>
+                    <div class="pl-11">
+                        <p class="text-sm text-gray-500 mb-2">Professional report creation with narrative clarity</p>
+                        <div class="flex items-center text-xs text-gray-500">
+                            <span class="mr-4"><i class="far fa-clock mr-1"></i> <span id="report-time">0 min</span></span>
+                            <span><i class="far fa-file-alt mr-1"></i> report.md</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="task-item" id="task-ethics-item">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3">
+                                <i class="fas fa-clock text-gray-400"></i>
+                            </span>
+                            <h3 class="font-bold text-gray-500">Ethics Assessment Task</h3>
+                        </div>
+                        <div class="text-sm font-medium text-gray-400">Pending</div>
+                    </div>
+                    <div class="pl-11">
+                        <p class="text-sm text-gray-500 mb-2">Evaluation of ethical dimensions and societal impacts</p>
+                        <div class="flex items-center text-xs text-gray-500">
+                            <span class="mr-4"><i class="far fa-clock mr-1"></i> <span id="ethics-time">0 min</span></span>
+                            <span><i class="far fa-file-alt mr-1"></i> ethics_assessment.md</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="task-item" id="task-master-item">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3">
+                                <i class="fas fa-clock text-gray-400"></i>
+                            </span>
+                            <h3 class="font-bold text-gray-500">Master Report Task</h3>
+                        </div>
+                        <div class="text-sm font-medium text-gray-400">Pending</div>
+                    </div>
+                    <div class="pl-11">
+                        <p class="text-sm text-gray-500 mb-2">Synthesis of all previous outputs into master document</p>
+                        <div class="flex items-center text-xs text-gray-500">
+                            <span class="mr-4"><i class="far fa-clock mr-1"></i> <span id="master-time">0 min</span></span>
+                            <span><i class="far fa-file-alt mr-1"></i> master_report.md</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="task-item" id="task-presentation-item">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3">
+                                <i class="fas fa-clock text-gray-400"></i>
+                            </span>
+                            <h3 class="font-bold text-gray-500">Presentation Task</h3>
+                        </div>
+                        <div class="text-sm font-medium text-gray-400">Pending</div>
+                    </div>
+                    <div class="pl-11">
+                        <p class="text-sm text-gray-500 mb-2">Creation of presentation slides with visual elements</p>
+                        <div class="flex items-center text-xs text-gray-500">
+                            <span class="mr-4"><i class="far fa-clock mr-1"></i> <span id="presentation-time">0 min</span></span>
+                            <span><i class="far fa-file-alt mr-1"></i> presentation.md</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="task-item" id="task-dashboard-item">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3">
+                                <i class="fas fa-clock text-gray-400"></i>
+                            </span>
+                            <h3 class="font-bold text-gray-500">Dashboard Spec Task</h3>
+                        </div>
+                        <div class="text-sm font-medium text-gray-400">Pending</div>
+                    </div>
+                    <div class="pl-11">
+                        <p class="text-sm text-gray-500 mb-2">Design of interactive dashboard specification</p>
+                        <div class="flex items-center text-xs text-gray-500">
+                            <span class="mr-4"><i class="far fa-clock mr-1"></i> <span id="dashboard-time">0 min</span></span>
+                            <span><i class="far fa-file-alt mr-1"></i> dashboard_spec.json</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="task-item" id="task-template-item">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3">
+                                <i class="fas fa-clock text-gray-400"></i>
+                            </span>
+                            <h3 class="font-bold text-gray-500">Tracking Template Task</h3>
+                        </div>
+                        <div class="text-sm font-medium text-gray-400">Pending</div>
+                    </div>
+                    <div class="pl-11">
+                        <p class="text-sm text-gray-500 mb-2">Creation of document template for ongoing tracking</p>
+                        <div class="flex items-center text-xs text-gray-500">
+                            <span class="mr-4"><i class="far fa-clock mr-1"></i> <span id="template-time">0 min</span></span>
+                            <span><i class="far fa-file-alt mr-1"></i> tracking_template.xlsx</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Output Preview Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-md">
+                <div class="border-b px-6 py-3 flex justify-between items-center">
+                    <h3 id="output-title" class="font-bold">Latest Output</h3>
+                    <div class="flex space-x-2">
+                        <button id="download-output" class="text-gray-500 hover:text-blue-500">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button id="preview-output" class="text-gray-500 hover:text-blue-500">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="output-preview" class="p-6 output-preview">
+                    <p class="text-gray-500">No output available yet. Run a project to generate documents.</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md">
+                <div class="border-b px-6 py-3 flex justify-between items-center">
+                    <h3 class="font-bold">Latest Visualization</h3>
+                    <div class="flex space-x-2">
+                        <button class="text-gray-500 hover:text-blue-500">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-blue-500">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6 flex justify-center">
+                    <img id="visualization-preview" src="/api/placeholder/500/250" alt="Visualization Placeholder" class="rounded-lg shadow border">
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-bold mb-4">System Controls</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div>
+                    <h3 class="font-medium mb-2">Process Management</h3>
+                    <div class="flex space-x-2">
+                        <button id="pause-process" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded flex items-center">
+                            <i class="fas fa-pause mr-2"></i> Pause
+                        </button>
+                        <button id="stop-process" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded flex items-center">
+                            <i class="fas fa-stop mr-2"></i> Stop
+                        </button>
+                        <button id="restart-process" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center">
+                            <i class="fas fa-redo-alt mr-2"></i> Restart
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-medium mb-2">Task Management</h3>
+                    <div>
+                        <label for="priority-task" class="block text-sm text-gray-600 mb-1">Set Priority Task</label>
+                        <select id="priority-task" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border">
+                            <option value="task-research">Research Task</option>
+                            <option value="task-data">Data Analysis Task</option>
+                            <option value="task-report">Reporting Task</option>
+                            <option value="task-ethics">Ethics Assessment Task</option>
+                            <option value="task-master">Master Report Task</option>
+                            <option value="task-presentation">Presentation Task</option>
+                            <option value="task-dashboard">Dashboard Spec Task</option>
+                            <option value="task-template">Tracking Template Task</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-medium mb-2">Output Format</h3>
+                    <div>
+                        <label for="output-format" class="block text-sm text-gray-600 mb-1">Preferred Format</label>
+                        <select id="output-format" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border">
+                            <option value="all">All Formats</option>
+                            <option value="markdown">Markdown Only</option>
+                            <option value="json">JSON Only</option>
+                            <option value="excel">Excel Only</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="preview-modal" class="hidden fixed inset-0 modal-overlay flex items-center justify-center z-50">
+        <div class="preview-modal p-6 w-full max-w-3xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modal-title" class="text-lg font-semibold">Document Preview</h3>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="modal-content" class="text-gray-700"></div>
+        </div>
+    </div>
+
+    <script>
+        // Simulate task progress and agent status updates
+        const agents = [
+            { id: 'researcher', progress: 'researcher-progress', status: 'researcher-status' },
+            { id: 'analyst', progress: 'analyst-progress', status: 'analyst-status' },
+            { id: 'reporting', progress: 'reporting-progress', status: 'reporting-status' },
+            { id: 'ethics', progress: 'ethics-progress', status: 'ethics-status' },
+            { id: 'integration', progress: 'integration-progress', status: 'integration-status' }
+        ];
+
+        const tasks = [
+            { id: 'task-research', time: 'research-time', output: 'research_brief.md' },
+            { id: 'task-data', time: 'data-time', output: 'data_analysis.md' },
+            { id: 'task-report', time: 'report-time', output: 'report.md' },
+            { id: 'task-ethics', time: 'ethics-time', output: 'ethics_assessment.md' },
+            { id: 'task-master', time: 'master-time', output: 'master_report.md' },
+            { id: 'task-presentation', time: 'presentation-time', output: 'presentation.md' },
+            { id: 'task-dashboard', time: 'dashboard-time', output: 'dashboard_spec.json' },
+            { id: 'task-template', time: 'template-time', output: 'tracking_template.xlsx' }
+        ];
+
+        // Initialize task states
+        let taskStates = tasks.map(task => ({
+            id: task.id,
+            status: 'Pending',
+            time: 0,
+            completed: false
+        }));
+        let completedTasks = 0;
+
+        // New Project Button
+        document.getElementById('new-project-btn').addEventListener('click', () => {
+            document.getElementById('topic').value = '';
+            document.getElementById('current-year').value = '2025';
+            tasks.forEach(task => {
+                const checkbox = document.getElementById(task.id);
+                checkbox.checked = true;
+            });
+            resetTaskStates();
+        });
+
+        // Run Project Button
+        document.getElementById('run-project').addEventListener('click', async () => {
+            const topic = document.getElementById('topic').value;
+            const year = document.getElementById('current-year').value;
+            const selectedTasks = tasks.filter(task => document.getElementById(task.id).checked);
+
+            if (!topic) {
+                alert('Please enter a research topic.');
+                return;
+            }
+
+            document.getElementById('run-project').disabled = true;
+            document.getElementById('run-project').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Running...';
+
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        topic,
+                        year,
+                        tasks: selectedTasks.map(task => task.id)
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to generate documents');
+
+                const data = await response.json();
+                simulateTaskProgress(selectedTasks, data.files);
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            } finally {
+                document.getElementById('run-project').disabled = false;
+                document.getElementById('run-project').innerHTML = '<i class="fas fa-play mr-2"></i> Run Project';
+            }
+        });
+
+        // Process Management Buttons
+        document.getElementById('pause-process').addEventListener('click', () => alert('Pause functionality not implemented.'));
+        document.getElementById('stop-process').addEventListener('click', () => {
+            resetTaskStates();
+            alert('Process stopped.');
+        });
+        document.getElementById('restart-process').addEventListener('click', () => {
+            resetTaskStates();
+            document.getElementById('run-project').click();
+        });
+
+        // Preview and Download Buttons
+        document.getElementById('preview-output').addEventListener('click', () => {
+            const outputTitle = document.getElementById('output-title').textContent.replace('Latest Output: ', '');
+            const outputContent = document.getElementById('output-preview').innerHTML;
+            showModal(outputTitle, outputContent);
+        });
+
+        document.getElementById('download-output').addEventListener('click', () => {
+            const outputFile = document.getElementById('output-title').textContent.replace('Latest Output: ', '').toLowerCase().replace(' ', '_') + '.md';
+            window.location.href = `/outputs/${outputFile}`;
+        });
+
+        // Modal Controls
+        document.getElementById('close-modal').addEventListener('click', () => {
+            document.getElementById('preview-modal').classList.add('hidden');
+        });
+
+        function showModal(title, content) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-content').innerHTML = content;
+            document.getElementById('preview-modal').classList.remove('hidden');
+        }
+
+        function resetTaskStates() {
+            taskStates.forEach(task => {
+                task.status = 'Pending';
+                task.time = 0;
+                task.completed = false;
+                updateTaskUI(task.id, 'Pending', 0);
+            });
+            agents.forEach(agent => {
+                document.getElementById(`${agent.id}-status`).textContent = 'Waiting';
+                document.getElementById(`${agent.progress}`).setAttribute('stroke-dashoffset', 283);
+            });
+            completedTasks = 0;
+            document.getElementById('task-progress').textContent = '0/8';
+            document.getElementById('output-preview').innerHTML = '<p class="text-gray-500">No output available yet. Run a project to generate documents.</p>';
+            document.getElementById('output-title').textContent = 'Latest Output';
+        }
+
+        function updateTaskUI(taskId, status, time, outputFile) {
+            const taskItem = document.getElementById(`${taskId}-item`);
+            const statusElement = taskItem.querySelector('.text-sm.font-medium');
+            const iconContainer = taskItem.querySelector('.w-8.h-8.rounded-full');
+            const title = taskItem.querySelector('h3');
+            const description = taskItem.querySelector('p');
+            const timeElement = document.getElementById(`${taskId.replace('task-', '')}-time`);
+
+            statusElement.textContent = status;
+            timeElement.textContent = `${time} min`;
+            if (status === 'Completed') {
+                iconContainer.innerHTML = '<i class="fas fa-check text-green-500"></i>';
+                iconContainer.classList.replace('bg-gray-100', 'bg-green-100');
+                statusElement.classList.replace('text-blue-500', 'text-green-500');
+                statusElement.classList.replace('text-gray-400', 'text-green-500');
+                title.classList.remove('text-gray-500');
+                description.classList.remove('text-gray-500');
+                completedTasks++;
+                document.getElementById('task-progress').textContent = `${completedTasks}/${tasks.length}`;
+                if (outputFile) {
+                    document.getElementById('output-title').textContent = `Latest Output: ${outputFile.split('.')[0].replace('_', ' ').toUpperCase()}`;
+                    fetch(`/outputs/${outputFile}`)
+                        .then(res => res.text())
+                        .then(data => {
+                            document.getElementById('output-preview').innerHTML = `<pre class="text-gray-700">${data}</pre>`;
+                        });
+                }
+            } else if (status === 'In Progress') {
+                iconContainer.innerHTML = '<div class="animated-gradient w-4 h-4 rounded-full"></div>';
+                iconContainer.classList.replace('bg-gray-100', 'bg-blue-100');
+                statusElement.classList.replace('text-gray-400', 'text-blue-500');
+                title.classList.remove('text-gray-500');
+                description.classList.remove('text-gray-500');
+            }
+        }
+
+        function updateAgentUI(agentId, status, progress) {
+            const statusElement = document.getElementById(`${agentId}-status`);
+            const progressElement = document.getElementById(`${agentId}-progress`);
+            statusElement.textContent = status;
+            const dashOffset = 283 - (progress / 100) * 283;
+            progressElement.setAttribute('stroke-dashoffset', dashOffset);
+            if (status === 'Completed') {
+                statusElement.classList.replace('text-gray-500', 'text-green-500');
+            } else if (status === 'Running') {
+                statusElement.classList.replace('text-gray-500', 'text-blue-500');
+            }
+        }
+
+        async function simulateTaskProgress(selectedTasks, files) {
+            for (let i = 0; i < selectedTasks.length; i++) {
+                const task = selectedTasks[i];
+                const taskState = taskStates.find(t => t.id === task.id);
+                taskState.status = 'In Progress';
+                updateTaskUI(task.id, 'In Progress', 0);
+
+                // Map tasks to agents
+                const agentMap = {
+                    'task-research': 'researcher',
+                    'task-data': 'analyst',
+                    'task-report': 'reporting',
+                    'task-ethics': 'ethics',
+                    'task-master': 'integration',
+                    'task-presentation': 'integration',
+                    'task-dashboard': 'integration',
+                    'task-template': 'integration'
+                };
+                const agentId = agentMap[task.id];
+                updateAgentUI(agentId, 'Running', 0);
+
+                // Simulate progress
+                let progress = 0;
+                const duration = Math.floor(Math.random() * 20) + 10; // Random 10-30 min
+                while (progress < 100) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    progress += 5;
+                    taskState.time = Math.round((progress / 100) * duration);
+                    updateTaskUI(task.id, 'In Progress', taskState.time);
+                    updateAgentUI(agentId, 'Running', progress);
+                }
+
+                taskState.status = 'Completed';
+                taskState.completed = true;
+                updateTaskUI(task.id, 'Completed', duration, task.output);
+                updateAgentUI(agentId, 'Completed', 100);
+            }
+        }
+    </script>
+</body>
+</html>

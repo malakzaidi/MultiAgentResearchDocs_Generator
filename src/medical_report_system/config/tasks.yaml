@@ -29,7 +29,7 @@ research_task:
     4. A timeline of major developments over the past 3-5 years
     5. Identification of 3-5 knowledge gaps worthy of further investigation
   agent: researcher
-  output_file: research_brief.md
+  output_file: research_brief.docx
 
 data_analysis_task:
   description: >
@@ -53,7 +53,7 @@ data_analysis_task:
     5. Recommendations for metrics that should be tracked over time
     6. Specification for a dashboard that would effectively communicate the findings
   agent: data_analyst
-  output_file: data_analysis.md
+  output_file: data_analysis.doc
 
 reporting_task:
   description: >
@@ -193,4 +193,4 @@ tracking_template_task:
     2. Pre-populated rows based on current findings
     3. Notes for updating and maintaining the template
   agent: integration_specialist
-  output_file: tracking_template.xlsx
+  output_file: tracking_template.csv

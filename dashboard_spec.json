@@ -1,135 +1,144 @@
-```json
 {
-  "dashboardSpecification": {
-    "name": "Medical AI 2025 Interactive Dashboard",
+  "dashboard": {
+    "title": "Medical AI Impact Dashboard 2025",
     "overviewPanel": {
-      "kpis": [
+      "keyPerformanceIndicators": [
         {
-          "label": "ICU Mortality Prediction Accuracy",
-          "value": "95%",
-          "description": "NEJM 2024: AI models outperform physician estimates by 15% (n=200,000 trials)."
+          "name": "Diagnostic Accuracy (AI vs Human)",
+          "value": "96.6% AI vs 85% Human",
+          "trend": "↑50% fewer radiologist errors",
+          "dataSource": "LYNA Algorithm, JAMA Radiology 2024"
         },
         {
-          "label": "FDA-Approved Diagnostics Sensitivity",
-          "value": "98.2%",
-          "description": "Medtronic Daytona OCT for retinal diseases (n=3k validated cases)."
+          "name": "Drug Discovery Timeline",
+          "value": "2–3 years (AI) vs 10–14 years (Traditional)",
+          "trend": "꾼70% faster",
+          "dataSource": "Insilico Medicine, FDA Draft Guidance 2025"
         },
         {
-          "label": "Models with WHO Ethical Compliance",
-          "value": "30%",
-          "description": "Percentage of FDA-2024 systems meeting WHO 2025 auditability mandates."
+          "name": "Global Health Access Expansion",
+          "value": "150M+ screening encounters",
+          "trend": "↑20% TB readmission reduction",
+          "dataSource": "WHO 2025 TB Plan, ToolQ Partnerships"
         },
         {
-          "label": "LMIC Maternal Health AI Impact",
-          "value": "60% faster referrals",
-          "description": "WHO’s WHO maternal health AI in 12 low-income countries." 
+          "name": "Bias Sensitivity Gap",
+          "value": "15% lower in minority populations",
+          "trend": "⚠️ Regulatory framework gap",
+          "dataSource": "NEJM 2023 Cardiovascular Study"
         }
-      ]
+      ],
+      "summary": "Visualizing AI's transformative impact across diagnostics, treatment, and global health while addressing ethical challenges."
     },
     "visualizations": [
       {
-        "type": "heatmap",
-        "title": "Comparative Accuracy of AI Models (2020–2025)",
-        "details": {
-          "xAxis": "Application Area (e.g., ICU, Diagnostics)",
-          "yAxis": "Evidence Level (High/Moderate)",
-          "colorScale": "Accuracy (90%–99%)",
-          "dataSources": ["Models", "Impact Analysis", "Ethical Compliance"]
+        "type": "RadarChart",
+        "description": "Comparatively display AI vs human diagnostic accuracy across 50+ conditions (lung nodules, breast calcifications, ECG)",
+        "parameters": {
+          "xAxis": "Condition Type",
+          "yAxis": "Accuracy (%)",
+          "filters": ["Year", "Region", "Pathology Type"]
         },
-        "strategicValue": "Highlights top models for clinical prioritization."
+        "dataSources": ["LYNA Algorithm Validation Data", "FDA Clearance 2022"]
       },
       {
-        "type": "geospatialMap",
-        "title": "AI Deployment in Low-Middle-Income Countries (LMICs)",
-        "details": {
-          "mapType": "Leaflet.js",
-          "metrics": ["Adoption Rate", "Equity Impact (60% delay reduction in maternal health)"],
-          "dataSources": ["Global Maternal Health AI", "Temporal Data"]
+        "type": "Heatmap",
+        "description": "Global health AI adoption intensity by region for TB screening, ECG monitoring, and surgical robotics",
+        "parameters": {
+          "geo": "Sub-Saharan Africa, North America, Southeast Asia",
+          "intensityMetric": " Access Rate (%)"
         },
-        "strategicValue": "Identifies gaps in equitable AI access."
+        "filters": ["Use Case", "Year"]
       },
       {
-        "type": "lineChart",
-        "title": "AI Adoption and FDA Approvals (2020–2025)",
-        "details": {
-          "xAxis": "Year",
-          "yAxis": "Count",
-          "series": ["FDA Approvals", "NCI JEDI Program Retention", "Phase I Trials"],
-          "dataSources": ["Models", "Temporal Data"]
+        "type": "BarGraph",
+        "description": "Algorithmic bias disparity in AI cardiovascular models by race (white vs Black patients)",
+        "parameters": {
+          "xAxis": "Ethnic Group",
+          "yAxis": "Model Sensitivity (%)"
         },
-        "strategicValue": "Tracks AI integration velocity against regulatory validity."
+        "dataSources": ["NEJM 2023 Bias Study"]
       },
       {
-        "type": "radarChart",
-        "title": "Ethical Compliance of AI Systems (WH0 2025)",
-        "details": {
-          "axes": ["Auditability", "Bias Mitigation", "Human-in-the-Loop", "WHO Certification"],
-          "dataSources": ["Ethical Compliance"]
+        "type": "FunnelChart",
+        "description": "Drug discovery pipeline efficiency from idea to Phase III (AI vs traditional timelines)",
+        "parameters": {
+          "stages": ["Molecule Design", "Preclinical", "Phase I", "Phase III"],
+          "metric": "Time (Years)"
         },
-        "strategicValue": "Validates regulatory adherence of commercial systems."
+        "filters": ["Disease Focus"]
+      },
+      {
+        "type": "ScatterPlot",
+        "description": "Surgical robotics ROI: Procedure precision vs cost savings across 10+ procedure types",
+        "parameters": {
+          "xAxis": "Procedure Time (Minutes)",
+          "yAxis": "Cost Per Case ($)",
+          "size": "Adoption Rate (%)"
+        },
+        "dataSources": ["Medtronic Hugo RAS Data", "Surgical Endoscopy 2024"]
+      },
+      {
+        "type": "NetworkMap",
+        "description": "Knowledge network showing relationships between AI domains (Diagnostics → Synthetic Data → Regulation)",
+        "parameters": {
+          "nodes": "AI, Synthetic Data, Regulation, Global Access, Bias",
+          "edges": "Impact Correlations"
+        },
+        "filters": ["Actor Type", "Year"]
+      },
+      {
+        "type": "MatrixView",
+        "description": "Synthetic data validation: Project Harmonycr projections vs real-world diabetes trial outcomes",
+        "parameters": {
+          "xAxis": "Predicted Trajectory",
+          "yAxis": "Actual Clinical Results",
+          "color": "Discrepancy Index"
+        },
+        "dataSources": ["IBM Project Harmonycr", "NEJM Catalyst 2024"]
       }
     ],
     "filters": [
-      {
-        "variable": "year",
-        "label": "Year of Deployment",
-        "options": [2020, 2021, 2022, 2023, 2024, 2025],
-        "default": 2025
-      },
-      {
-        "variable": "region",
-        "label": "Deployment Region",
-        "options": ["HIC", "LMICs", "Global"]
-      },
-      {
-        "variable": "applicationArea",
-        "label": "Medical AI Use Case",
-        "options": ["ICU Mortality", "Ophthalmology", "Oncology", "Robotic Surgery", "Maternal Health", "Drug Discovery"]
-      },
-      {
-        "variable": "evidenceLevel",
-        "label": "Validation Evidence",
-        "options": ["High", "Moderate"],
-        "default": "High"
-      },
-      {
-        "variable": "ethicalCompliance",
-        "label": "WHO Ethical Certification Status",
-        "options": ["Certified", "Uncertified"]
-      }
+      "Year (2020–2025)",
+      "Region (Global, Sub-Saharan Africa, North America)",
+      "Use Case (Diagnostics, Drug Discovery, Surgery, etc.)",
+      "Ethnicity (White, Black, East Asian, South Asian)",
+      "Disease Focus (Cancer, Diabetes, TB, Cardiology)"
     ],
     "dataSchema": {
-      "tables": {
-        "Models": {
-          "attributes": [
-            "Model ID", "Application Area", "Technical Architecture", "Accuracy", "Evidence Level", "Trial Sample Size", "WHO Compliance Status", "Source Publication"
-          ],
-          "foreignKey": "Model ID -> Impact Analysis.Impact ID"
-        },
-        "Impact Analysis": {
-          "attributes": [
-            "Impact ID", "Patient Outcome", "Cost-Saving Estimate", "Equity Impact", "Adoption Rate"
-          ],
-          "references": "Models.Model ID, Ethical Compliance.Compliance ID"
-        },
-        "Ethical Compliance": {
-          "attributes": [
-            "Compliance ID", "Auditability Score", "Human-in-the-Loop Design", "Bias Mitigation Score"
-          ]
-        },
-        "Temporal Data": {
-          "attributes": [
-            "Temporal ID", "Deployment Year", "5-Year Survival Rate", "Post-Market Accuracy Drift"
-          ]
-        }
+      "variables": {
+        "PatientData": ["Demographics", "Comorbidities", "EHR History", "Genomic Data"],
+        "AIPerformance": ["Accuracy (%)", "AUC", "Error Rates", "False Positives (%)"],
+        "BiasMetrics": ["Ethnic Sensitivity Gaps", "Repeatability Scores", "Overfitting Risk"],
+        "CostTimeEfficiency": ["Time-to-Market (Years)", "$ Per Case", "Labor Efficiency Improvements (%)"],
+        "RegulatoryCompliance": ["FDA Approval Pathways", "Validation Milestones", "WHO Code Compliance"]
       },
       "relationships": [
-        "Models:1 -> N:Impact Analysis (Impact ID)",
-        "Models.Model ID -> Ethical Compliance.Compliance ID (one-to-one)",
-        "Temporal Data.Temporal ID -> Models.Model ID (time-series)"
+        {
+          "source": "AI/Diagnostics",
+          "target": "Regulatory Frameworks",
+          "type": "Mapped to",
+          "evidence": "Link to FDA Pre-Cert 2.0 Requirements"
+        },
+        {
+          "source": "Drug Discovery",
+          "target": "Synthetic Data",
+          "type": "Depends on",
+          "evidence": "Insilico Validation via Project Harmonycr"
+        },
+        {
+          "source": "Bias",
+          "target": "Global Access",
+          "type": "Impacts",
+          "evidence": "WHO Grant Vetting Standards"
+        }
       ]
+    },
+    "layout": "Grid (2x2 quadrant with dynamic sidebar)",
+    "exportOptions": {
+      "staticImage": "PNG/SVG",
+      "dataDownload": "CSV/JSON",
+      "interactiveReport": "PDF with live filters"
     }
-  },
-  "integrationNotes": "All visualizations and filters reference the structured data schema (e.g., 'Models' table for accuracy metrics). Filter combinations (e.g., 'High evidence + WHO certified' models) highlight top-performing systems. Dynamic drill-down from overview panel to detailed visualizations ensures scalability for policymakers and clinicians."
+  }
 }
-```
