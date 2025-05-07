@@ -1,0 +1,196 @@
+# TASK DEFINITIONS
+research_task:
+  description: >
+    Conduct comprehensive research on {topic}, focusing on developments as of {current_year}.
+    Your investigation should be systematic and evidence-based, considering:
+    
+    1. Scientific and technological breakthroughs (last 1-3 years)
+    2. Key research groups, companies, and individual contributors
+    3. Emerging methodologies and approaches gaining traction
+    4. Real-world applications and case studies demonstrating impact
+    5. Unsolved challenges and promising research directions
+    6. Cross-disciplinary connections and unexpected applications
+    7. Competing theories or approaches with their respective evidence
+    8. Regional variations in development and adoption
+    9. Historical context necessary to understand current state
+    10. Regulatory, ethical, and policy considerations
+    
+    For each finding, evaluate source credibility, evidence quality, and potential bias.
+  expected_output: >
+    A structured research brief with:
+    
+    1. A list of exactly 12 substantive insights about {topic}, each representing a distinct and significant aspect
+    2. For each insight:
+       - A concise headline (5-10 words)
+       - A detailed explanation (3-5 sentences)
+       - An evidence assessment (high/medium/low confidence)
+       - Key sources or examples supporting the insight
+    3. A preliminary knowledge graph identifying connections between insights
+    4. A timeline of major developments over the past 3-5 years
+    5. Identification of 3-5 knowledge gaps worthy of further investigation
+  agent: researcher
+  output_file: research_brief.md
+
+data_analysis_task:
+  description: >
+    Based on the research findings, create a quantitative analysis framework for {topic}.
+    Transform qualitative insights into structured data that reveals patterns, trends, and relationships.
+    
+    Your analysis should:
+    1. Identify key variables and metrics worth tracking
+    2. Develop appropriate data structures for each aspect of {topic}
+    3. Create visualizations that highlight critical relationships and trends
+    4. Apply basic statistical analysis to validate apparent patterns
+    5. Generate comparative frameworks for evaluating different approaches
+    6. Design a dashboard structure that would allow exploration of the data
+  expected_output: >
+    A data analysis package including:
+    
+    1. Data schema with key variables, relationships, and measurement approaches
+    2. 5-7 visualization concepts with explanations of their strategic value
+    3. Statistical highlights identifying the most significant patterns
+    4. Comparative framework for evaluating approaches or solutions
+    5. Recommendations for metrics that should be tracked over time
+    6. Specification for a dashboard that would effectively communicate the findings
+  agent: data_analyst
+  output_file: data_analysis.md
+
+reporting_task:
+  description: >
+    Transform the research findings and data analysis into a comprehensive report on {topic}.
+    Create a professional document that combines narrative clarity with analytical depth.
+    
+    Your report should:
+    1. Present a compelling narrative arc that connects individual findings
+    2. Balance technical depth with strategic clarity
+    3. Support key points with specific examples and evidence
+    4. Address implications for different stakeholders
+    5. Include visual elements that enhance understanding
+    6. Provide actionable conclusions and next steps
+    
+    Consider multiple audience needs:
+    - Technical experts seeking depth
+    - Decision-makers needing strategic clarity
+    - Newcomers requiring contextual understanding
+  expected_output: >
+    A professional report including:
+    
+    1. Executive summary (250-500 words)
+    2. Introduction establishing context and importance
+    3. 10-12 main sections, each developing a key insight with:
+       - Clear subheading
+       - Detailed explanation (2-3 paragraphs)
+       - Supporting evidence and examples
+       - Visual support where appropriate
+       - Practical implications
+    4. Future outlook section addressing emerging trends
+    5. Strategic recommendations section
+    6. Reference section with key sources
+    7. Appendix with supplementary information
+    
+    The report should use professional formatting with consistent style throughout.
+  agent: reporting_analyst
+  output_file: report.md
+
+ethics_assessment_task:
+  description: >
+    Evaluate the ethical dimensions and societal impacts of developments in {topic}.
+    Consider multiple perspectives, timeframes, and stakeholder groups.
+    
+    Your assessment should address:
+    1. Potential benefits and risks for different populations
+    2. Considerations for fairness, justice, and inclusion
+    3. Privacy, security, and autonomy implications
+    4. Environmental and sustainability impacts
+    5. Potential for misuse or unintended consequences
+    6. Governance and regulatory considerations
+    7. Long-term societal implications
+  expected_output: >
+    An ethical impact assessment including:
+    
+    1. Impact matrix evaluating benefits and risks across stakeholder groups
+    2. Identification of 5-7 key ethical considerations requiring attention
+    3. Analysis of potential misuse scenarios and safeguards
+    4. Recommendations for responsible development and governance
+    5. Framework for ongoing ethical evaluation as {topic} evolves
+  agent: ethics_guardian
+  output_file: ethics_assessment.md
+
+master_report_task:
+  description: >
+    Synthesize outputs from all previous tasks into a cohesive master document about {topic}.
+    The master document should harmonize findings from research, data analysis, reporting, and ethics assessment.
+    
+    Your synthesis should:
+    1. Harmonize potential inconsistencies across different analyses
+    2. Create logical connections between research, data, reporting, and ethical elements
+    3. Optimize information architecture for comprehensive understanding
+    4. Ensure all critical insights are represented appropriately
+  expected_output: >
+    A master document including:
+    
+    1. Executive summary synthesizing key findings
+    2. Integrated sections covering technical advancements, clinical impacts, ethical considerations, and gaps
+    3. Strategic recommendations for stakeholders
+    4. Reference section with key sources
+  agent: integration_specialist
+  output_file: master_report.md
+
+presentation_task:
+  description: >
+    Create presentation-ready slides based on outputs from all previous tasks about {topic}.
+    The slides should capture core insights in a visually compelling format.
+    
+    Your slides should:
+    1. Summarize key findings from research, data analysis, reporting, and ethics assessment
+    2. Use concise text and visual elements to highlight critical points
+    3. Ensure logical flow for stakeholder presentations
+    4. Address diverse audience needs (technical experts, decision-makers, newcomers)
+  expected_output: >
+    A presentation document including:
+    
+    1. Title slide with topic and context
+    2. 5-7 slides covering key insights, trends, and recommendations
+    3. Visual elements (e.g., charts, graphs, infographics) to support findings
+    4. Closing slide with call to action
+  agent: integration_specialist
+  output_file: presentation.md
+
+dashboard_spec_task:
+  description: >
+    Design an interactive dashboard specification based on outputs from all previous tasks about {topic}.
+    The dashboard should enable exploration of data and insights.
+    
+    Your specification should:
+    1. Define key performance indicators (KPIs) and metrics
+    2. Outline visualization types and their purposes
+    3. Specify filters and interactive features
+    4. Ensure alignment with research, data analysis, and ethical findings
+  expected_output: >
+    A JSON specification for an interactive dashboard including:
+    
+    1. Overview panel with KPIs
+    2. Visualization definitions (e.g., line graphs, heatmaps)
+    3. Filter options (e.g., year, region, use case)
+    4. Data schema references
+  agent: integration_specialist
+  output_file: dashboard_spec.json
+
+tracking_template_task:
+  description: >
+    Create a document template for ongoing tracking of {topic} developments based on outputs from all previous tasks.
+    The template should support stakeholder monitoring and updates.
+    
+    Your template should:
+    1. Define tracking objectives and KPIs
+    2. Include placeholders for periodic updates
+    3. Align with research, data analysis, and ethical findings
+    4. Support strategic decision-making
+  expected_output: >
+    An Excel template including:
+    
+    1. Columns for phase, objective, KPIs, owner, and status
+    2. Pre-populated rows based on current findings
+    3. Notes for updating and maintaining the template
+  agent: integration_specialist
+  output_file: tracking_template.xlsx

@@ -1,0 +1,135 @@
+```json
+{
+  "dashboardSpecification": {
+    "name": "Medical AI 2025 Interactive Dashboard",
+    "overviewPanel": {
+      "kpis": [
+        {
+          "label": "ICU Mortality Prediction Accuracy",
+          "value": "95%",
+          "description": "NEJM 2024: AI models outperform physician estimates by 15% (n=200,000 trials)."
+        },
+        {
+          "label": "FDA-Approved Diagnostics Sensitivity",
+          "value": "98.2%",
+          "description": "Medtronic Daytona OCT for retinal diseases (n=3k validated cases)."
+        },
+        {
+          "label": "Models with WHO Ethical Compliance",
+          "value": "30%",
+          "description": "Percentage of FDA-2024 systems meeting WHO 2025 auditability mandates."
+        },
+        {
+          "label": "LMIC Maternal Health AI Impact",
+          "value": "60% faster referrals",
+          "description": "WHO’s WHO maternal health AI in 12 low-income countries." 
+        }
+      ]
+    },
+    "visualizations": [
+      {
+        "type": "heatmap",
+        "title": "Comparative Accuracy of AI Models (2020–2025)",
+        "details": {
+          "xAxis": "Application Area (e.g., ICU, Diagnostics)",
+          "yAxis": "Evidence Level (High/Moderate)",
+          "colorScale": "Accuracy (90%–99%)",
+          "dataSources": ["Models", "Impact Analysis", "Ethical Compliance"]
+        },
+        "strategicValue": "Highlights top models for clinical prioritization."
+      },
+      {
+        "type": "geospatialMap",
+        "title": "AI Deployment in Low-Middle-Income Countries (LMICs)",
+        "details": {
+          "mapType": "Leaflet.js",
+          "metrics": ["Adoption Rate", "Equity Impact (60% delay reduction in maternal health)"],
+          "dataSources": ["Global Maternal Health AI", "Temporal Data"]
+        },
+        "strategicValue": "Identifies gaps in equitable AI access."
+      },
+      {
+        "type": "lineChart",
+        "title": "AI Adoption and FDA Approvals (2020–2025)",
+        "details": {
+          "xAxis": "Year",
+          "yAxis": "Count",
+          "series": ["FDA Approvals", "NCI JEDI Program Retention", "Phase I Trials"],
+          "dataSources": ["Models", "Temporal Data"]
+        },
+        "strategicValue": "Tracks AI integration velocity against regulatory validity."
+      },
+      {
+        "type": "radarChart",
+        "title": "Ethical Compliance of AI Systems (WH0 2025)",
+        "details": {
+          "axes": ["Auditability", "Bias Mitigation", "Human-in-the-Loop", "WHO Certification"],
+          "dataSources": ["Ethical Compliance"]
+        },
+        "strategicValue": "Validates regulatory adherence of commercial systems."
+      }
+    ],
+    "filters": [
+      {
+        "variable": "year",
+        "label": "Year of Deployment",
+        "options": [2020, 2021, 2022, 2023, 2024, 2025],
+        "default": 2025
+      },
+      {
+        "variable": "region",
+        "label": "Deployment Region",
+        "options": ["HIC", "LMICs", "Global"]
+      },
+      {
+        "variable": "applicationArea",
+        "label": "Medical AI Use Case",
+        "options": ["ICU Mortality", "Ophthalmology", "Oncology", "Robotic Surgery", "Maternal Health", "Drug Discovery"]
+      },
+      {
+        "variable": "evidenceLevel",
+        "label": "Validation Evidence",
+        "options": ["High", "Moderate"],
+        "default": "High"
+      },
+      {
+        "variable": "ethicalCompliance",
+        "label": "WHO Ethical Certification Status",
+        "options": ["Certified", "Uncertified"]
+      }
+    ],
+    "dataSchema": {
+      "tables": {
+        "Models": {
+          "attributes": [
+            "Model ID", "Application Area", "Technical Architecture", "Accuracy", "Evidence Level", "Trial Sample Size", "WHO Compliance Status", "Source Publication"
+          ],
+          "foreignKey": "Model ID -> Impact Analysis.Impact ID"
+        },
+        "Impact Analysis": {
+          "attributes": [
+            "Impact ID", "Patient Outcome", "Cost-Saving Estimate", "Equity Impact", "Adoption Rate"
+          ],
+          "references": "Models.Model ID, Ethical Compliance.Compliance ID"
+        },
+        "Ethical Compliance": {
+          "attributes": [
+            "Compliance ID", "Auditability Score", "Human-in-the-Loop Design", "Bias Mitigation Score"
+          ]
+        },
+        "Temporal Data": {
+          "attributes": [
+            "Temporal ID", "Deployment Year", "5-Year Survival Rate", "Post-Market Accuracy Drift"
+          ]
+        }
+      },
+      "relationships": [
+        "Models:1 -> N:Impact Analysis (Impact ID)",
+        "Models.Model ID -> Ethical Compliance.Compliance ID (one-to-one)",
+        "Temporal Data.Temporal ID -> Models.Model ID (time-series)"
+      ]
+    }
+  },
+  "integrationNotes": "All visualizations and filters reference the structured data schema (e.g., 'Models' table for accuracy metrics). Filter combinations (e.g., 'High evidence + WHO certified' models) highlight top-performing systems. Dynamic drill-down from overview panel to detailed visualizations ensures scalability for policymakers and clinicians."
+}
+```

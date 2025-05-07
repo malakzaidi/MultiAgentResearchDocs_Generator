@@ -1,0 +1,4 @@
+INFO:root:Running crew with inputs: {'topic': 'Medical AI', 'current_year': '2025'}
+ERROR:root:Error in run_crew: 1 validation error for Crew
+  Value error, Please provide an OpenAI API key. You can get one at https://platform.openai.com/account/api-keys [type=value_error, input_value={'agents': [Agent(role=Me...': 'crew_execution.log'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/value_error
