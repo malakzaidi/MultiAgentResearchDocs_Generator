@@ -1,54 +1,125 @@
-# Multiagentresearchassistant Crew
+# Multi-Agent Financial Market Anomaly Detection System
 
-Welcome to the Multiagentresearchassistant Crew project, powered by [crewAI](https://crewai.com). This template is designed to help you set up a multi-agent AI system with ease, leveraging the powerful and flexible framework provided by crewAI. Our goal is to enable your agents to collaborate effectively on complex tasks, maximizing their collective intelligence and capabilities.
+A customizable AI-powered system that uses multiple specialized agents to detect, analyze, and report financial market anomalies tailored to your specific needs. This project delivers personalized economic intelligence through comprehensive, actionable reports.
 
-## Installation
+## Project Overview
 
-Ensure you have Python >=3.10 <3.13 installed on your system. This project uses [UV](https://docs.astral.sh/uv/) for dependency management and package handling, offering a seamless setup and execution experience.
+This system leverages the CrewAI framework to coordinate multiple AI agents, each specialized in different aspects of financial market analysis. The system processes financial data from various sources, identifies anomalies specific to your area of interest, investigates their root causes, and generates a targeted report with actionable recommendations.
 
-First, if you haven't already, install uv:
+## Key Features
 
-```bash
-pip install uv
-```
+- **Customizable analysis**: Select specific markets, regions, sectors, anomaly types, and time periods
+- **Multi-agent cooperation**: 7 specialized agents working together to analyze financial markets
+- **Comprehensive analysis**: Covers data collection, pattern recognition, sentiment analysis, forensic investigation, and research
+- **Actionable insights**: Final report includes practical recommendations tailored to your needs
+- **Multiple output formats**: Choose from technical, executive, academic, or regulatory-focused reporting
+- **Economic focus**: Designed to identify issues that could impact economic stability and growth
+- **Scalable architecture**: Can be extended to cover additional financial markets or data sources
 
-Next, navigate to your project directory and install the dependencies:
+## Getting Started
 
-(Optional) Lock the dependencies and install them by using the CLI command:
-```bash
-crewai install
-```
-### Customizing
+### Prerequisites
 
-**Add your `OPENAI_API_KEY` into the `.env` file**
+- Python 3.8+
+- pip
+- OpenRouter API key
 
-- Modify `src/multiagentresearchassistant/config/agents.yaml` to define your agents
-- Modify `src/multiagentresearchassistant/config/tasks.yaml` to define your tasks
-- Modify `src/multiagentresearchassistant/crew.py` to add your own logic, tools and specific args
-- Modify `src/multiagentresearchassistant/main.py` to add custom inputs for your agents and tasks
+### Installation
 
-## Running the Project
-
-To kickstart your crew of AI agents and begin task execution, run this from the root folder of your project:
+1. Clone this repository
+2. Install dependencies:
 
 ```bash
-$ crewai run
+pip install crewai openai python-dotenv
 ```
 
-This command initializes the MultiAgentResearchAssistant Crew, assembling the agents and assigning them tasks as defined in your configuration.
+3. Create a `.env` file in the project root with your API credentials:
 
-This example, unmodified, will run the create a `report.md` file with the output of a research on LLMs in the root folder.
+```
+MODEL=openrouter/qwen/qwen3-32b:free
+OPENROUTER_API_KEY=your_openrouter_api_key
+```
 
-## Understanding Your Crew
+### Running the System
 
-The MultiAgentResearchAssistant Crew is composed of multiple AI agents, each with unique roles, goals, and tools. These agents collaborate on a series of tasks, defined in `config/tasks.yaml`, leveraging their collective skills to achieve complex objectives. The `config/agents.yaml` file outlines the capabilities and configurations of each agent in your crew.
+#### Interactive Mode (Recommended for First-Time Users)
 
-## Support
+Execute the main script with no arguments to enter interactive configuration mode:
 
-For support, questions, or feedback regarding the Multiagentresearchassistant Crew or crewAI.
-- Visit our [documentation](https://docs.crewai.com)
-- Reach out to us through our [GitHub repository](https://github.com/joaomdmoura/crewai)
-- [Join our Discord](https://discord.com/invite/X4JWnZnxPb)
-- [Chat with our docs](https://chatg.pt/DWjSBZn)
+```bash
+python main.py
+```
 
-Let's create wonders together with the power and simplicity of crewAI.
+Follow the prompts to select your specific market focus, region, timeframe, and other parameters.
+
+#### Configuration File Mode (For Repeated Analyses)
+
+Create a JSON configuration file (see examples in `config_examples.json`) and run:
+
+```bash
+python main.py --config your_config.json
+```
+
+#### Default Mode (Quick Start)
+
+To run with default settings (global markets, all sectors, last quarter):
+
+```bash
+python main.py --non-interactive
+```
+
+The system will generate a report named based on your configuration (e.g., `stock_markets_united_states_valuation_anomalies_anomaly_report.md`).
+
+## System Architecture
+
+### Agents
+
+- **Data Collector**: Gathers financial data from multiple sources
+- **Pattern Recognizer**: Identifies unusual patterns and potential anomalies
+- **Sentiment Analyzer**: Monitors market sentiment across news and social media
+- **Forensic Investigator**: Determines the nature and significance of anomalies
+- **Researcher**: Provides contextual information and historical patterns
+- **Reporting Analyst**: Creates comprehensive reports with visualizations
+- **Coordination Manager**: Orchestrates workflow between all agents
+
+### Process Flow
+
+1. Data collection from multiple sources
+2. Pattern recognition to identify anomalies
+3. Sentiment analysis to detect market mood disconnects
+4. Forensic investigation of detected anomalies
+5. Research to provide context and historical precedents
+6. Comprehensive report generation with recommendations
+7. (Throughout) Process coordination and optimization
+
+## Report Structure
+
+The final report includes:
+
+- Executive summary of findings
+- Market environment overview
+- Detailed analysis of detected anomalies
+- Root cause analysis
+- Historical precedents and comparisons
+- Economic impact assessment
+- Recommended interventions
+- Implementation roadmap
+- Appendices with detailed methodology and data
+
+## Extending the System
+
+This project can be extended in various ways:
+
+- Add specialized agents for specific market segments
+- Implement additional data sources
+- Connect to real-time data streams
+- Integrate with trading or regulatory systems
+
+## License
+
+[MIT License](LICENSE)
+
+## Acknowledgments
+
+- [CrewAI](https://github.com/joaomdmoura/crewAI) for the multi-agent framework
+- OpenRouter for providing access to the Qwen model
