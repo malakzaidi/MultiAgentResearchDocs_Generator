@@ -5,9 +5,9 @@ from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
 import logging
 
-# Configure logging
+# Configure logging with INFO level for faster execution
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'app.log')),
@@ -29,12 +29,16 @@ class MultiAgentDocsCrew:
 
         agents_yaml_path = os.path.join(self.config_dir, 'agents.yaml')
         tasks_yaml_path = os.path.join(self.config_dir, 'tasks.yaml')
-        logger.info(f"Attempting to load agents.yaml from: {agents_yaml_path}")
-        logger.info(f"Attempting to load tasks.yaml from: {tasks_yaml_path}")
+        logger.info(f"Loading agents.yaml from: {agents_yaml_path}")
+        logger.info(f"Loading tasks.yaml from: {tasks_yaml_path}")
 
         self.agents_config = self.load_yaml(agents_yaml_path)
         self.tasks_config = self.load_yaml(tasks_yaml_path)
         self.llm = self.initialize_llm()
+        self.topic = os.environ.get('TOPIC', 'Default Topic')
+        self.current_year = os.environ.get('CURRENT_YEAR', '2025')
+        self.selected_tasks = os.environ.get('SELECTED_TASKS', '').split(',')
+        logger.info(f"Selected tasks: {self.selected_tasks}")
 
     def load_yaml(self, file_path):
         try:
@@ -42,27 +46,23 @@ class MultiAgentDocsCrew:
                 logger.error(f"File does not exist: {file_path}")
                 raise FileNotFoundError(f"File not found: {file_path}")
             with open(file_path, 'r') as file:
-                logger.info(f"Successfully opened YAML file: {file_path}")
                 content = file.read()
                 if not content.strip():
                     logger.error(f"YAML file is empty: {file_path}")
                     raise ValueError(f"YAML file is empty: {file_path}")
                 data = yaml.safe_load(content)
                 if data is None:
-                    logger.error(f"YAML file contains no data after parsing: {file_path}")
+                    logger.error(f"YAML file contains no data: {file_path}")
                     raise ValueError(f"YAML file contains no data: {file_path}")
                 return data
         except FileNotFoundError as e:
-            logger.error(f"FileNotFoundError while loading YAML file {file_path}: {str(e)}")
+            logger.error(f"FileNotFoundError: {str(e)}")
             raise ValueError(f"Failed to load YAML configs: {str(e)}")
         except yaml.YAMLError as e:
-            logger.error(f"YAML parsing error in file {file_path}: {str(e)}")
-            raise ValueError(f"Failed to load YAML configs: {str(e)}")
-        except PermissionError as e:
-            logger.error(f"PermissionError while accessing YAML file {file_path}: {str(e)}")
+            logger.error(f"YAML parsing error: {str(e)}")
             raise ValueError(f"Failed to load YAML configs: {str(e)}")
         except Exception as e:
-            logger.error(f"Unexpected error while loading YAML file {file_path}: {str(e)}")
+            logger.error(f"Unexpected error: {str(e)}")
             raise ValueError(f"Failed to load YAML configs: {str(e)}")
 
     def initialize_llm(self):
@@ -75,85 +75,113 @@ class MultiAgentDocsCrew:
             )
         else:
             logger.error("No valid API key found for LLM initialization")
-            raise ValueError("OPENROUTER_API_KEY  must be set in .env")
+            raise ValueError("OPENROUTER_API_KEY must be set in .env")
 
-    def crew(self):
-        topic = os.environ.get('TOPIC', 'Default Topic')
-        current_year = os.environ.get('CURRENT_YEAR', '2025')
-        selected_tasks = os.environ.get('SELECTED_TASKS', '').split(',')
+    def run(self):
+        # Define agents directly as per default crewai structure
+        researcher = Agent(
+            role="Senior Research Intelligence Specialist",
+            goal=f"Conduct comprehensive research on {self.topic}",
+            backstory="A seasoned researcher with expertise in AI advancements.",
+            llm=self.llm,
+            verbose=True,
+            allow_delegation=False
+        )
+        logger.info("Agent initialized: researcher")
 
-        logger.info(f"Selected tasks from environment: {selected_tasks}")
+        data_analyst = Agent(
+            role="Quantitative Intelligence Analyst",
+            goal=f"Create a quantitative analysis framework for {self.topic}",
+            backstory="An expert in transforming qualitative insights into data-driven patterns.",
+            llm=self.llm,
+            verbose=True,
+            allow_delegation=False
+        )
+        logger.info("Agent initialized: data_analyst")
 
-        # Initialize agents
-        agents = {}
-        for agent_name, config in self.agents_config.items():
-            agents[agent_name] = Agent(
-                role=config['role'].format(topic=topic),
-                goal=config['goal'].format(topic=topic),
-                backstory=config['backstory'].format(topic=topic),
-                llm=self.llm,
-                verbose=True,
-                allow_delegation=True,
-                capabilities=config.get('capabilities', [])
-            )
-            logger.info(f"Initialized agent: {agent_name}")
+        reporting_analyst = Agent(
+            role="Strategic Communication Specialist",
+            goal=f"Transform findings into a comprehensive report on {self.topic}",
+            backstory="A skilled communicator bridging technical and strategic insights.",
+            llm=self.llm,
+            verbose=True,
+            allow_delegation=False
+        )
+        logger.info("Agent initialized: reporting_analyst")
 
-        # Initialize tasks
+        ethics_guardian = Agent(
+            role="Ethics and Impact Evaluator",
+            goal=f"Evaluate the ethical dimensions of {self.topic}",
+            backstory="A guardian of ethical standards with deep societal impact knowledge.",
+            llm=self.llm,
+            verbose=True,
+            allow_delegation=False
+        )
+        logger.info("Agent initialized: ethics_guardian")
+
+        integration_specialist = Agent(
+            role="Knowledge Integration Architect",
+            goal=f"Synthesize all findings into a master report on {self.topic}",
+            backstory="An expert in integrating diverse insights into cohesive outputs.",
+            llm=self.llm,
+            verbose=True,
+            allow_delegation=False
+        )
+        logger.info("Agent initialized: integration_specialist")
+
+        # Define tasks based on YAML config
         tasks = []
+        agent_map = {
+            'researcher': researcher,
+            'data_analyst': data_analyst,
+            'reporting_analyst': reporting_analyst,
+            'ethics_guardian': ethics_guardian,
+            'integration_specialist': integration_specialist
+        }
         for task_name, config in self.tasks_config.items():
-            if task_name in selected_tasks:
-                logger.info(f"Initializing task: {task_name} with config: {config}")
-                task_description = config['description'].format(topic=topic, current_year=current_year)
+            if task_name in self.selected_tasks:
+                logger.info(f"Task: {task_name} - Starting for agent: {config['agent']}")
+                task_description = config['description'].format(topic=self.topic, current_year=self.current_year)
                 task = Task(
                     description=task_description,
-                    expected_output=config['expected_output'].format(topic=topic, current_year=current_year),
-                    agent=agents[config['agent']],
+                    expected_output=config['expected_output'].format(topic=self.topic, current_year=self.current_year),
+                    agent=agent_map[config['agent']],
                     output_file=config.get('output_file')
                 )
                 tasks.append(task)
-                logger.info(f"Initialized task: {task_name} with output {config.get('output_file')}")
+                logger.info(f"Task: {task_name} - Initialized with output: {config.get('output_file')}")
             else:
-                logger.info(f"Skipping task: {task_name} as it is not in selected_tasks")
+                logger.info(f"Task: {task_name} - Skipped (not in selected tasks)")
 
         if not tasks:
             logger.warning("No tasks initialized. Check selected_tasks and tasks_config.")
+            return False
 
-        # Create and return crew
+        # Create and execute the crew
         crew = Crew(
-            agents=list(agents.values()),
+            agents=[researcher, data_analyst, reporting_analyst, ethics_guardian, integration_specialist],
             tasks=tasks,
-            verbose=True
+            verbose=True,
+            process="sequential"
         )
-        logger.info("Successfully initialized Crew with agents and tasks")
+        logger.info("Crew initialized with agents and tasks")
 
-        # Wrap execution to include progress updates and generate master report
-        def wrapped_execute(crew_instance, *args, **kwargs):
-            logger.info("Starting crew execution")
-            if self.progress_callback:
-                self.progress_callback("System", "Starting all tasks", 0)
+        if self.progress_callback:
+            self.progress_callback("System", "Starting all tasks", 0)
 
-            # Execute tasks
-            results = crew_instance.kickoff()
+        results = crew.kickoff()
+        logger.info(f"Crew execution completed: {results}")
 
-            if self.progress_callback:
-                self.progress_callback("System", "All tasks completed", 100)
+        if self.progress_callback:
+            self.progress_callback("System", "All tasks completed", 100)
 
-            logger.info(f"Crew execution completed with results: {results}")
-
-            # Generate master_report.md by consolidating all task outputs
-            self.generate_master_report(tasks)
-
-            return True
-
-        return crew, wrapped_execute
-
-    def execute_crew(self, crew_instance, execute_func, *args, **kwargs):
-        return execute_func(crew_instance, *args, **kwargs)
+        self.generate_master_report(tasks)
+        return True
 
     def generate_master_report(self, tasks):
         output_path = os.path.join(self.base_dir, 'master_report.md')
-        topic = os.environ.get('TOPIC', 'Default Topic')
-        current_year = os.environ.get('CURRENT_YEAR', '2025')
+        topic = self.topic
+        current_year = self.current_year
 
         # Initialize the Markdown content
         md_content = [
@@ -161,14 +189,14 @@ class MultiAgentDocsCrew:
             f"**Generated on May 9, 2025**",
             "",
             "## Abstract",
-            f"This report synthesizes comprehensive research, data analysis, narrative reporting, and ethical assessments on {topic} as of {current_year}. It integrates key insights into a cohesive narrative, highlighting technological advancements, data-driven trends, stakeholder implications, and ethical considerations. Strategic recommendations are provided to guide future developments.",
+            f"This report synthesizes comprehensive research, data analysis, narrative reporting, and ethical assessments on {topic} as of {current_year}.",
             "",
             "## Introduction",
-            f"This report integrates findings from multiple perspectives to address {topic}'s current state and future potential. It covers research insights, data analysis, narrative reporting, and ethical considerations, providing a holistic view for stakeholders.",
+            f"This report integrates findings on {topic}'s current state and future potential.",
             ""
         ]
 
-        # Collect task outputs and append to the master report
+        # Collect task outputs efficiently with error handling
         sections = [
             ("Research Findings", "research_brief.md"),
             ("Data Analysis", "data_analysis.md"),
@@ -179,31 +207,35 @@ class MultiAgentDocsCrew:
 
         for section_title, output_file in sections:
             file_path = os.path.join(self.base_dir, output_file)
-            if os.path.exists(file_path):
-                md_content.append(f"## {section_title}")
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    content = f.read().strip()
-                    md_content.append(content)
-                md_content.append("")
-            else:
-                logger.warning(f"Output file not found for {section_title}: {file_path}")
+            try:
+                if os.path.exists(file_path):
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read().strip()
+                        md_content.append(f"## {section_title}")
+                        md_content.append(content)
+                        md_content.append("")
+                else:
+                    logger.info(f"Section skipped: {section_title} (output file not found: {file_path})")
+            except Exception as e:
+                logger.error(f"Error reading {file_path}: {str(e)}")
+                md_content.append(f"## {section_title} (Error: Content unavailable)")
 
-        # Add a recommendations section
+        # Add a simplified recommendations section
         md_content.extend([
             "## Recommendations",
-            "Based on the integrated findings, the following recommendations are proposed:",
-            "- **Invest in Research Gaps**: Address identified knowledge gaps through targeted research initiatives.",
-            "- **Enhance Ethical Frameworks**: Develop robust governance structures to mitigate risks and ensure fairness.",
-            "- **Monitor Trends**: Continuously track emerging trends and adapt strategies accordingly.",
+            "- Address knowledge gaps through targeted research.",
+            "- Develop ethical governance structures.",
             "",
             "## Conclusion",
-            f"This master report provides a comprehensive overview of {topic}, combining insights from various dimensions to inform future actions. It serves as a foundation for stakeholders to make informed decisions.",
-            "",
-            "## References",
-            "- Sources and references are embedded within each section as applicable."
+            f"This report provides an overview of {topic}.",
+            ""
         ])
 
         # Write the master report to file
-        with open(output_path, 'w', encoding='utf-8') as f:
-            f.write("\n".join(md_content))
-        logger.info(f"Generated master_report.md at {output_path}")
+        try:
+            with open(output_path, 'w', encoding='utf-8') as f:
+                f.write("\n".join(md_content))
+            logger.info(f"Generated master_report.md at {output_path}")
+        except Exception as e:
+            logger.error(f"Failed to write master_report.md: {str(e)}")
+            raise
