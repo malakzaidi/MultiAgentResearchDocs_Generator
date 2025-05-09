@@ -85,62 +85,14 @@ def generate_documents():
         crew_manager.execute_crew(crew, execute_func)
         logger.info("Crew execution completed")
 
-        # Collect generated files from project root
+        # Collect the generated master report
         files = [
-            {
-                'name': 'research_brief.md',
-                'url': '/outputs/research_brief.md',
-                'type': 'markdown',
-                'content': open(os.path.join(BASE_DIR, 'research_brief.md'), 'r').read() if os.path.exists(
-                    os.path.join(BASE_DIR, 'research_brief.md')) else ''
-            },
-            {
-                'name': 'data_analysis.md',
-                'url': '/outputs/data_analysis.md',
-                'type': 'markdown',
-                'content': open(os.path.join(BASE_DIR, 'data_analysis.md'), 'r').read() if os.path.exists(
-                    os.path.join(BASE_DIR, 'data_analysis.md')) else ''
-            },
-            {
-                'name': 'report.md',
-                'url': '/outputs/report.md',
-                'type': 'markdown',
-                'content': open(os.path.join(BASE_DIR, 'report.md'), 'r').read() if os.path.exists(
-                    os.path.join(BASE_DIR, 'report.md')) else ''
-            },
-            {
-                'name': 'ethics_assessment.md',
-                'url': '/outputs/ethics_assessment.md',
-                'type': 'markdown',
-                'content': open(os.path.join(BASE_DIR, 'ethics_assessment.md'), 'r').read() if os.path.exists(
-                    os.path.join(BASE_DIR, 'ethics_assessment.md')) else ''
-            },
             {
                 'name': 'master_report.md',
                 'url': '/outputs/master_report.md',
                 'type': 'markdown',
                 'content': open(os.path.join(BASE_DIR, 'master_report.md'), 'r').read() if os.path.exists(
                     os.path.join(BASE_DIR, 'master_report.md')) else ''
-            },
-            {
-                'name': 'presentation.md',
-                'url': '/outputs/presentation.md',
-                'type': 'markdown',
-                'content': open(os.path.join(BASE_DIR, 'presentation.md'), 'r').read() if os.path.exists(
-                    os.path.join(BASE_DIR, 'presentation.md')) else ''
-            },
-            {
-                'name': 'dashboard_spec.json',
-                'url': '/outputs/dashboard_spec.json',
-                'type': 'json',
-                'content': json.load(open(os.path.join(BASE_DIR, 'dashboard_spec.json'))) if os.path.exists(
-                    os.path.join(BASE_DIR, 'dashboard_spec.json')) else {}
-            },
-            {
-                'name': 'master_report.pdf',
-                'url': '/outputs/master_report.pdf',
-                'type': 'pdf',
-                'content': ''  # PDF content is not read as text; served as a file
             }
         ]
         files = [f for f in files if os.path.exists(os.path.join(BASE_DIR, f['name']))]
@@ -171,7 +123,6 @@ def progress():
 
 @app.route('/api/placeholder/<int:width>/<int:height>')
 def placeholder(width, height):
-    # Mock placeholder response (replace with actual image serving if needed)
     return jsonify({'message': f'Placeholder {width}x{height} not implemented'}), 200
 
 @app.route('/outputs/<path:filename>')

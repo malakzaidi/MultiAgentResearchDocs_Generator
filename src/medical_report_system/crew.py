@@ -4,13 +4,6 @@ from crewai import Agent, Task, Crew
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
 import logging
-import threading
-from concurrent.futures import ThreadPoolExecutor
-import time
-from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib import colors
 
 # Configure logging
 logging.basicConfig(
@@ -80,10 +73,9 @@ class MultiAgentDocsCrew:
                 openai_api_base='https://openrouter.ai/api/v1',
                 model_name='openrouter/qwen/qwen3-32b:free'
             )
-
         else:
             logger.error("No valid API key found for LLM initialization")
-            raise ValueError("OPENROUTER_API_KEY or GROK_API_KEY must be set in .env")
+            raise ValueError("OPENROUTER_API_KEY  must be set in .env")
 
     def crew(self):
         topic = os.environ.get('TOPIC', 'Default Topic')
@@ -100,7 +92,7 @@ class MultiAgentDocsCrew:
                 goal=config['goal'].format(topic=topic),
                 backstory=config['backstory'].format(topic=topic),
                 llm=self.llm,
-                verbose=True,  # Ensures detailed logging of agent actions
+                verbose=True,
                 allow_delegation=True,
                 capabilities=config.get('capabilities', [])
             )
@@ -130,28 +122,27 @@ class MultiAgentDocsCrew:
         crew = Crew(
             agents=list(agents.values()),
             tasks=tasks,
-            verbose=2  # Increased verbosity for detailed execution logs
+            verbose=True
         )
         logger.info("Successfully initialized Crew with agents and tasks")
 
-        # Wrap execution to include progress updates
+        # Wrap execution to include progress updates and generate master report
         def wrapped_execute(crew_instance, *args, **kwargs):
             logger.info("Starting crew execution")
-            start_time = time.time()
-
-            # Use crew.kickoff() to execute all tasks
             if self.progress_callback:
                 self.progress_callback("System", "Starting all tasks", 0)
-            result = crew_instance.kickoff()
+
+            # Execute tasks
+            results = crew_instance.kickoff()
+
             if self.progress_callback:
                 self.progress_callback("System", "All tasks completed", 100)
 
-            logger.info(f"Crew execution completed with result: {result}")
-            logger.info(f"Crew execution completed in {time.time() - start_time:.2f} seconds")
+            logger.info(f"Crew execution completed with results: {results}")
 
-            # Generate master_report.pdf if master_report_task is selected
-            if 'master_report_task' in selected_tasks:
-                self.generate_master_pdf(tasks)
+            # Generate master_report.md by consolidating all task outputs
+            self.generate_master_report(tasks)
+
             return True
 
         return crew, wrapped_execute
@@ -159,131 +150,60 @@ class MultiAgentDocsCrew:
     def execute_crew(self, crew_instance, execute_func, *args, **kwargs):
         return execute_func(crew_instance, *args, **kwargs)
 
-    def generate_master_pdf(self, tasks):
-        output_dir = os.path.join(self.base_dir, 'outputs')
-        os.makedirs(output_dir, exist_ok=True)
-        output_path = os.path.join(output_dir, 'master_report.pdf')
+    def generate_master_report(self, tasks):
+        output_path = os.path.join(self.base_dir, 'master_report.md')
+        topic = os.environ.get('TOPIC', 'Default Topic')
+        current_year = os.environ.get('CURRENT_YEAR', '2025')
 
-        # Set up styles for the PDF
-        styles = getSampleStyleSheet()
-        title_style = styles['Title']
-        heading_style = styles['Heading1']
-        subheading_style = styles['Heading2']
-        normal_style = styles['Normal']
-        normal_style.leading = 14  # Line spacing
+        # Initialize the Markdown content
+        md_content = [
+            f"# Master Report on {topic}",
+            f"**Generated on May 9, 2025**",
+            "",
+            "## Abstract",
+            f"This report synthesizes comprehensive research, data analysis, narrative reporting, and ethical assessments on {topic} as of {current_year}. It integrates key insights into a cohesive narrative, highlighting technological advancements, data-driven trends, stakeholder implications, and ethical considerations. Strategic recommendations are provided to guide future developments.",
+            "",
+            "## Introduction",
+            f"This report integrates findings from multiple perspectives to address {topic}'s current state and future potential. It covers research insights, data analysis, narrative reporting, and ethical considerations, providing a holistic view for stakeholders.",
+            ""
+        ]
 
-        # Create PDF document
-        doc = SimpleDocTemplate(output_path, pagesize=A4)
-        elements = []
+        # Collect task outputs and append to the master report
+        sections = [
+            ("Research Findings", "research_brief.md"),
+            ("Data Analysis", "data_analysis.md"),
+            ("Narrative Report", "report.md"),
+            ("Ethical Assessment", "ethics_assessment.md"),
+            ("Presentation Summary", "presentation.md")
+        ]
 
-        # Title
-        elements.append(Paragraph(f"Master Report on {os.environ.get('TOPIC', 'Default Topic')}", title_style))
-        elements.append(Paragraph("Integration Specialist", normal_style))
-        elements.append(Paragraph("May 9, 2025", normal_style))
-        elements.append(Spacer(1, 12))
+        for section_title, output_file in sections:
+            file_path = os.path.join(self.base_dir, output_file)
+            if os.path.exists(file_path):
+                md_content.append(f"## {section_title}")
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read().strip()
+                    md_content.append(content)
+                md_content.append("")
+            else:
+                logger.warning(f"Output file not found for {section_title}: {file_path}")
 
-        # Abstract
-        elements.append(Paragraph("Abstract", heading_style))
-        abstract_text = (
-            f"This report synthesizes comprehensive research, data analysis, narrative reporting, and ethical "
-            f"assessments on {os.environ.get('TOPIC', 'Default Topic')} as of {os.environ.get('CURRENT_YEAR', '2025')}. "
-            f"It integrates key insights into a cohesive narrative, highlighting technological advancements, "
-            f"data-driven trends, stakeholder implications, and ethical considerations. Strategic recommendations "
-            f"are provided to guide future developments, supported by tables and visualizations."
-        )
-        elements.append(Paragraph(abstract_text, normal_style))
-        elements.append(Spacer(1, 12))
+        # Add a recommendations section
+        md_content.extend([
+            "## Recommendations",
+            "Based on the integrated findings, the following recommendations are proposed:",
+            "- **Invest in Research Gaps**: Address identified knowledge gaps through targeted research initiatives.",
+            "- **Enhance Ethical Frameworks**: Develop robust governance structures to mitigate risks and ensure fairness.",
+            "- **Monitor Trends**: Continuously track emerging trends and adapt strategies accordingly.",
+            "",
+            "## Conclusion",
+            f"This master report provides a comprehensive overview of {topic}, combining insights from various dimensions to inform future actions. It serves as a foundation for stakeholders to make informed decisions.",
+            "",
+            "## References",
+            "- Sources and references are embedded within each section as applicable."
+        ])
 
-        # Introduction
-        elements.append(Paragraph("Introduction", heading_style))
-        intro_text = (
-            f"Integrating findings from multiple perspectives, this report addresses "
-            f"{os.environ.get('TOPIC', 'Default Topic')}'s current state and future potential."
-        )
-        elements.append(Paragraph(intro_text, normal_style))
-        elements.append(Spacer(1, 12))
-
-        # Batch read content from relevant task outputs
-        content = []
-        file_paths = []
-        for task in tasks:
-            if task.output_file in ['research_brief.md', 'data_analysis.md', 'report.md', 'ethics_assessment.md', 'master_report.md']:
-                file_path = os.path.join(self.base_dir, task.output_file)
-                if os.path.exists(file_path):
-                    file_paths.append(file_path)
-                else:
-                    logger.warning(f"Output file not found: {file_path}")
-
-        # Batch read files
-        with ThreadPoolExecutor() as executor:
-            content = list(executor.map(lambda fp: open(fp, 'r', encoding='utf-8').read(), file_paths))
-
-        # Add sections
-        section_titles = ["Research Findings", "Data Analysis", "Narrative Report", "Ethical Assessment", "Synthesis and Recommendations"]
-        for section, content in zip(section_titles, content):
-            elements.append(Paragraph(section, heading_style))
-            lines = content.split('\n')
-            in_table = False
-            table_data = []
-            for line in lines:
-                line = line.strip()
-                if line.startswith('# '):
-                    if in_table:
-                        self._add_table(elements, table_data)
-                        in_table = False
-                        table_data = []
-                    elements.append(Paragraph(line[2:], subheading_style))
-                elif line.startswith('|'):
-                    if not in_table:
-                        in_table = True
-                    table_data.append(line)
-                elif line and not in_table:
-                    if "figure" in line.lower() or "visualization" in line.lower():
-                        elements.append(Paragraph(f"[Placeholder for figure: {line}]", normal_style))
-                        elements.append(Paragraph(f"Caption: Conceptual visualization of {line.split()[0]}", normal_style))
-                    else:
-                        elements.append(Paragraph(line, normal_style))
-            if in_table:
-                self._add_table(elements, table_data)
-            elements.append(Spacer(1, 12))
-
-        # Appendix
-        elements.append(Paragraph("Supplementary Information", heading_style))
-        elements.append(Paragraph("Additional details are available upon request.", normal_style))
-        elements.append(Spacer(1, 12))
-
-        # Build PDF
-        try:
-            doc.build(elements)
-            logger.info(f"Generated master_report.pdf in {output_dir}")
-        except Exception as e:
-            logger.error(f"Failed to generate PDF with reportlab: {str(e)}")
-            raise
-
-    def _add_table(self, elements, table_lines):
-        if not table_lines or not any('|' in line for line in table_lines):
-            return
-        # Parse table data
-        headers = table_lines[0].split('|')[1:-1]
-        headers = [h.strip() for h in headers]
-        data = [headers]
-        for line in table_lines[2:]:
-            if '|' in line:
-                cells = [cell.strip() for cell in line.split('|')[1:-1]]
-                data.append(cells)
-        # Create table
-        table = Table(data)
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 12),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 1), (-1, -1), 10),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ]))
-        elements.append(table)
+        # Write the master report to file
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write("\n".join(md_content))
+        logger.info(f"Generated master_report.md at {output_path}")

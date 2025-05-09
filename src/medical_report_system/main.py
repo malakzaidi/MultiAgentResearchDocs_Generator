@@ -2,7 +2,7 @@
 import sys
 import os
 from datetime import datetime
-from src.medical_report_system.crew import MultiAgentDocsCrew
+from medical_report_system.crew import MultiAgentDocsCrew
 
 
 def run():
