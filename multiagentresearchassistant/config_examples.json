@@ -1,0 +1,58 @@
+{
+  "crypto_example": {
+    "market_focus": "Cryptocurrency",
+    "region_focus": "Global",
+    "sector_focus": "All Sectors",
+    "analysis_focus": "Volatility Spikes",
+    "timeframe": "Last Month",
+    "analysis_purpose": "Investment Strategy",
+    "output_format": "Technical",
+    "additional_notes": "Focus on Bitcoin, Ethereum, and major altcoins. Pay special attention to correlations with traditional markets."
+  },
+
+  "us_stock_example": {
+    "market_focus": "Stock Markets",
+    "region_focus": "North America",
+    "country_focus": "United States",
+    "sector_focus": "Technology",
+    "analysis_focus": "Valuation Anomalies",
+    "timeframe": "Last Quarter",
+    "analysis_purpose": "Investment Strategy",
+    "output_format": "Executive",
+    "additional_notes": "Focus on FAANG stocks and comparison to broader tech sector."
+  },
+
+  "eu_financial_example": {
+    "market_focus": "Stock Markets",
+    "region_focus": "Europe",
+    "sector_focus": "Financial Services",
+    "analysis_focus": "Regulatory Violations",
+    "timeframe": "Last Year",
+    "analysis_purpose": "Regulatory Compliance",
+    "output_format": "Regulatory",
+    "additional_notes": "Focus on recent EU financial regulations and their impact."
+  },
+
+  "commodity_example": {
+    "market_focus": "Commodities",
+    "region_focus": "Global",
+    "sector_focus": "Energy",
+    "analysis_focus": "Price Manipulation",
+    "timeframe": "Last 5 Years",
+    "analysis_purpose": "Policy Development",
+    "output_format": "Academic",
+    "additional_notes": "Focus on oil and natural gas markets, with attention to geopolitical factors."
+  },
+
+  "real_estate_example": {
+    "market_focus": "Real Estate",
+    "region_focus": "Asia Pacific",
+    "country_focus": "Singapore",
+    "sector_focus": "Real Estate",
+    "analysis_focus": "Valuation Anomalies",
+    "timeframe": "Last 5 Years",
+    "analysis_purpose": "Risk Management",
+    "output_format": "Technical",
+    "additional_notes": "Focus on commercial real estate sector and potential bubble indicators."
+  }
+}

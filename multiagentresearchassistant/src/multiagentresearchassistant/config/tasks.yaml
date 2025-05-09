@@ -1,0 +1,152 @@
+collect_data_task:
+  description: >
+    Collect and preprocess comprehensive financial data from multiple sources including market prices,
+    trading volumes, news articles, social media sentiment, and macroeconomic indicators.
+  expected_output: >
+    A structured dataset containing normalized financial data from various sources,
+    ready for pattern recognition and anomaly detection. Include market prices, volumes,
+    news sentiment scores, and other relevant metrics.
+  agent: data_collector
+  async_execution: false
+  contexts: []
+  output_json:
+    data_sources_used: str
+    time_periods_covered: str
+    total_records_processed: int
+    dataset_schema: dict
+    data_quality_assessment: str
+  tools:
+    - WebSearch
+
+detect_patterns_task:
+  description: >
+    Analyze the collected financial data to identify unusual patterns and potential anomalies 
+    using various statistical methods and machine learning algorithms. Focus on price movements,
+    trading volumes, and correlations between different assets or markets.
+  expected_output: >
+    A list of detected anomalies with statistical significance scores, timestamps, and
+    initial classification of the type of anomaly detected.
+  agent: pattern_recognizer
+  async_execution: false
+  contexts: []
+  dependencies:
+    - collect_data_task
+  output_json:
+    anomalies_detected: list
+    detection_methods_used: list
+    confidence_scores: dict
+    anomaly_timestamps: list
+    initial_classifications: dict
+  tools:
+    - WebSearch
+
+analyze_sentiment_task:
+  description: >
+    Monitor and analyze market sentiment across news sources, financial publications, and social media
+    to identify disconnects between sentiment and price movements or potential manipulation attempts.
+  expected_output: >
+    A comprehensive analysis of market sentiment related to the detected anomalies, including
+    sentiment trends, unusual shifts, and potential manipulation indicators.
+  agent: sentiment_analyzer
+  async_execution: false
+  contexts: []
+  dependencies:
+    - collect_data_task
+  output_json:
+    sentiment_scores: dict
+    sentiment_trends: dict
+    sentiment_price_disconnects: list
+    potential_manipulation_indicators: list
+    source_credibility_assessment: dict
+  tools:
+    - WebSearch
+
+investigate_anomalies_task:
+  description: >
+    Conduct a thorough investigation of the anomalies flagged by previous tasks to determine
+    their nature, potential causes, and significance. Connect data points across different markets
+    to identify relationships and distinguish between legitimate market behavior and potential manipulation.
+  expected_output: >
+    Detailed forensic analysis of each anomaly, including potential causes, involved entities,
+    similar historical events, and assessment of whether it represents market manipulation.
+  agent: forensic_investigator
+  async_execution: false
+  contexts: []
+  dependencies:
+    - detect_patterns_task
+    - analyze_sentiment_task
+  output_json:
+    anomaly_causes: dict
+    entities_involved: dict
+    historical_comparisons: list
+    manipulation_likelihood: dict
+    regulatory_implications: list
+  tools:
+    - WebSearch
+
+research_task:
+  description: >
+    Research contextual information related to the identified anomalies, including company events,
+    industry developments, regulatory changes, and macroeconomic factors that might explain the unusual market activity.
+    Look for historical precedents of similar anomalies and their outcomes.
+  expected_output: >
+    A comprehensive research report providing context for each anomaly, including relevant events,
+    historical precedents, and expert opinions that might explain the observed patterns.
+  agent: researcher
+  async_execution: false
+  contexts: []
+  dependencies:
+    - investigate_anomalies_task
+  output_json:
+    contextual_events: dict
+    historical_precedents: list
+    expert_opinions: dict
+    regulatory_environment: str
+    market_conditions: str
+  tools:
+    - WebSearch
+    - Tavily
+
+reporting_task:
+  description: >
+    Create a detailed, actionable report on the identified financial market anomalies. Include clear visualizations,
+    executive summaries, and recommended actions based on the findings. The report should be accessible to different
+    stakeholders while maintaining analytical rigor.
+  expected_output: >
+    A comprehensive, well-structured report on financial market anomalies with visualizations,
+    executive summary, detailed analysis, and actionable recommendations.
+  agent: reporting_analyst
+  async_execution: false
+  contexts: []
+  dependencies:
+    - research_task
+  output_file: "comprehensive_financial_anomaly_report.md"
+  output_json:
+    executive_summary: str
+    key_findings: list
+    risk_assessment: dict
+    recommended_actions: list
+    visualization_descriptions: list
+  tools:
+    - WebSearch
+
+coordination_task:
+  description: >
+    Orchestrate the workflow between all other agents, ensure efficient information flow, prioritize
+    investigations based on severity and confidence, and maintain a holistic view of the entire anomaly
+    detection process. Resolve any conflicts or inconsistencies in the findings.
+  expected_output: >
+    A coordination report detailing the workflow management, prioritization decisions, information flow,
+    and system performance metrics throughout the anomaly detection process.
+  agent: coordination_manager
+  async_execution: true
+  contexts: []
+  dependencies: []
+  output_json:
+    workflow_efficiency: dict
+    priority_decisions: list
+    information_flow_metrics: dict
+    system_performance: dict
+    improvement_recommendations: list
+  tools:
+    - WebSearch
