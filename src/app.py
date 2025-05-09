@@ -1,9 +1,9 @@
-from flask import Flask, request, jsonify, send_from_directory, send_file, Response
+from flask import Flask, request, jsonify, send_from_directory, Response
 from flask_cors import CORS
 import os
 import json
 import logging
-from crewai import Crew
+from crewai import Process
 from medical_report_system.crew import MultiAgentDocsCrew
 from dotenv import load_dotenv
 import queue
@@ -38,9 +38,13 @@ TASK_MAPPING = {
     'task-ethics': 'ethics_assessment_task',
     'task-master': 'master_report_task',
     'task-presentation': 'presentation_task',
-    'task-dashboard': 'dashboard_spec_task',
-    'task-template': 'tracking_template_task'
+    'task-dashboard': 'dashboard_spec_task'
 }
+
+@app.route('/')
+def health_check():
+    logger.info("Health check endpoint accessed")
+    return jsonify({'message': 'Flask server is running. Use /api/generate to create reports.'}), 200
 
 @app.route('/api/generate', methods=['POST'])
 def generate_documents():
@@ -59,9 +63,9 @@ def generate_documents():
     try:
         logger.info(f"Starting document generation for topic: {topic}, year: {year}, tasks: {tasks}")
         # Verify environment variables
-        if not os.environ.get('OPENROUTER_API_KEY') and not os.environ.get('GROK_API_KEY'):
-            logger.error("Missing API keys")
-            raise ValueError("OPENROUTER_API_KEY or GROK_API_KEY must be set in .env")
+        if not os.environ.get('OPENROUTER_API_KEY'):
+            logger.error("Missing API key")
+            raise ValueError("OPENROUTER_API_KEY must be set in .env")
 
         # Set environment variables
         os.environ['TOPIC'] = topic
@@ -77,13 +81,8 @@ def generate_documents():
         # Create the MultiAgentDocsCrew instance with our progress callback
         crew_manager = MultiAgentDocsCrew(progress_callback=progress_callback)
 
-        # Get the crew object and execute function
-        crew, execute_func = crew_manager.crew()
-
-        logger.info("Crew initialized, starting execution")
-        # Execute the crew using the provided execute function
-        crew_manager.execute_crew(crew, execute_func)
-        logger.info("Crew execution completed")
+        # Execute the crew using the created crew instance
+        crew_manager.execute_crew(crew_manager.create_crew())
 
         # Collect the generated master report
         files = [
@@ -114,6 +113,7 @@ def progress():
         while True:
             try:
                 message = progress_queue.get_nowait()
+                logger.debug(f"Progress message sent: {message}")
                 yield f"data: {json.dumps({'message': message})}\n\n"
             except queue.Empty:
                 time.sleep(0.1)
@@ -123,15 +123,23 @@ def progress():
 
 @app.route('/api/placeholder/<int:width>/<int:height>')
 def placeholder(width, height):
+    logger.info(f"Placeholder endpoint called: {width}x{height}")
     return jsonify({'message': f'Placeholder {width}x{height} not implemented'}), 200
 
 @app.route('/outputs/<path:filename>')
 def serve_file(filename):
-    return send_from_directory(BASE_DIR, filename)
+    try:
+        logger.info(f"Serving file: {filename}")
+        return send_from_directory(BASE_DIR, filename)
+    except FileNotFoundError as e:
+        logger.error(f"File not found: {filename}, error: {str(e)}")
+        return jsonify({'error': f'File {filename} not found'}), 404
 
-@app.route('/')
-def serve_ui():
-    return send_file(os.path.join(BASE_DIR, 'frontend', 'index.html'))
+# Log unknown routes
+@app.errorhandler(404)
+def page_not_found(e):
+    logger.warning(f"404 error: {request.url} not found")
+    return jsonify({'error': 'Not Found', 'message': str(e)}), 404
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

@@ -2,6 +2,7 @@ import streamlit as st
 import os
 import requests
 import time
+import json  # Added missing import
 
 # Set up the Streamlit app
 st.title("AI Research Report Generator")
